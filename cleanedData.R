@@ -19,3 +19,4 @@ cat("Rows after cleaning:", nrow(clean_data), "\n")
 
 head(clean_data)
 
+write.csv(clean_data, "cleaned_sp500_data.csv")
