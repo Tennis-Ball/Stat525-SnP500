@@ -10,6 +10,47 @@ library(broom)
 data_path <- "cleaned_sp500_data.csv"
 clean_data <- read.csv(data_path)
 
+# Example of pre and post log transformation on variable
+pre <- (clean_data$Price.Book)
+pre[is.infinite(pre)] <- NA # drop zero/negative
+png("Histogram_RawPB.png", width = 800, height = 600)
+hist(
+  pre,
+  breaks = 30,
+  main = "Histogram of P/B Ratio (Raw)",
+  xlab = "log(Price/Book)",
+  col = "tomato1",
+  border = "black"
+)
+dev.off()
+
+post <- log(clean_data$Price.Book)
+post[is.infinite(post)] <- NA # drop zero/negative
+png("Histogram_LogPB.png", width = 800, height = 600)
+hist(
+  post,
+  breaks = 30,
+  main = "Histogram of P/B Ratio (Log)",
+  xlab = "log(Price/Book)",
+  col = "forestgreen",
+  border = "black"
+)
+dev.off()
+
+# Log-transformed histogram
+g <- log(clean_data$Price.Earnings)
+g[is.infinite(g)] <- NA # drop zero/negative
+png("Histogram_LogPE.png", width = 800, height = 600)
+hist(
+  g,
+  breaks = 30,
+  main = "Histogram of Log(P/E) Ratio",
+  xlab = "log(Price/Earnings)",
+  col = "tomato1",
+  border = "black"
+)
+dev.off()
+
 # Fit linear model on log-transformed variables
 model <- lm(
   log(Price.Earnings) ~
@@ -29,12 +70,12 @@ pe99 <- quantile(clean_data$Price.Earnings, 0.99, na.rm = TRUE)
 png("Histogram_PE.png", width = 800, height = 600)
 hist(
   clean_data$Price.Earnings,
-  breaks = 30,
+  breaks = 100,
   xlim = c(0, pe99),
   main = "Histogram of P/E Ratio (0–99th percentile)",
   xlab = "Price/Earnings",
-  col = "lightgray",
-  border = "white"
+  col = "forestgreen",
+  border = "black"
 )
 dev.off()
 
@@ -47,8 +88,8 @@ hist(
   breaks = 30,
   main = "Histogram of Log(P/E) Ratio",
   xlab = "log(Price/Earnings)",
-  col = "lightgray",
-  border = "white"
+  col = "tomato1",
+  border = "black"
 )
 dev.off()
 
@@ -66,6 +107,7 @@ stats <- data.frame(
   Q3 = sapply(clean_data[vars], function(x) quantile(x, .75, na.rm = TRUE))
 )
 print(stats)
+
 
 # 3. Scatterplot matrix and correlation matrix (log-transformed)
 png("Scatterplot_Matrix.png", width = 1000, height = 1000)
@@ -90,8 +132,8 @@ hist(
   breaks = 30,
   main = "Histogram of Residuals",
   xlab = "Residuals",
-  col = "lightgray",
-  border = "white"
+  col = "royalblue",
+  border = "black"
 )
 dev.off()
 
@@ -108,7 +150,7 @@ dev.off()
 # Q-Q plot of residuals
 png("Residuals_QQ.png", width = 800, height = 600)
 qqnorm(res, main = "Normal Q-Q Plot")
-qqline(res)
+qqline(res, col='red2', lwd=2)
 dev.off()
 
 # Residuals vs Fitted with reference line
@@ -133,4 +175,3 @@ print(glance_stats)
 # 7. Variance Inflation Factors for multicollinearity check
 vif_values <- vif(model)
 print(vif_values)
-
